@@ -199,4 +199,31 @@ const Login = async (req, res) => {
     });
   }
 };
-module.exports = { createUser, addPassword, verifyOtp, resendOtp, Login };
+const getUserProfile = async (req, res) => {
+  const { user_id } = req.params;
+
+  try {
+    const userData = await models.Users.findOne({
+      where: { user_id },
+    });
+    console.log(userData);
+    res.status(400).json({
+      status: true,
+      message: "USer dta fetched succefully",
+      data: userData,
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: false,
+      message: error.message || serverError,
+    });
+  }
+};
+module.exports = {
+  createUser,
+  addPassword,
+  verifyOtp,
+  resendOtp,
+  Login,
+  getUserProfile,
+};

@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 const { unauthorized } = require("../constant/messages");
 
-const authorization = (req, res) => {
+const authorization = (req, res, next) => {
   const { authorization } = req.headers;
 
   try {

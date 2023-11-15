@@ -60,6 +60,6 @@ const validateLogin = (data) => {
         "string.pattern.base": `Password must contain at least a number, letter and special characters`,
       }),
   });
-  return loginValidation.validate();
+  return loginValidation.validate(data);
 };
 module.exports = { validateCreateAccount, validatePassword, validateLogin };
