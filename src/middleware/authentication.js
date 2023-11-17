@@ -5,7 +5,7 @@ const authentication = async (req, res, next) => {
   const email = req.params.userEmail;
   try {
     const userData = await models.Users.findOne({ where: { email: email } });
-
+    console.log(userData.user_id);
     if (!userData) throw new Error(unauthorized);
     req.params.user_id = userData.user_id;
 

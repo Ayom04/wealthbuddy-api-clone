@@ -8,12 +8,12 @@ const authorization = (req, res, next) => {
     if (!authorization) throw new Error(unauthorized);
 
     const tokenSplit = authorization.split(" ");
-    console.log(authorization);
+
     jwt.verify(tokenSplit[1], process.env.JWT_SECRET, (err, decoded) => {
       if (err) throw new Error(unauthorized);
 
       req.params.userEmail = decoded.email;
-      console.log("here", decoded.email);
+
       next();
     });
   } catch (error) {

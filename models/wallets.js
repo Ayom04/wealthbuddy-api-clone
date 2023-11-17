@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       user_id: DataTypes.STRING,
       wallet_id: DataTypes.STRING,
-      investment: DataTypes.DOUBLE(10, 2),
+      investments: DataTypes.DOUBLE(10, 2),
       wallet_balance: DataTypes.DOUBLE(10, 2),
       returns: DataTypes.DOUBLE(10, 2),
       savings: DataTypes.DOUBLE(10, 2),

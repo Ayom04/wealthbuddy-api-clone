@@ -3,6 +3,12 @@ const router = express.Router();
 
 const authorization = require("../middleware/authorization");
 const authentication = require("../middleware/authentication");
-router.post("/ready");
+const { completeWalletFunding } = require("../controllers/payment");
+router.post(
+  "/start-payment",
+  authorization,
+  authentication,
+  completeWalletFunding
+);
 
 module.exports = router;
