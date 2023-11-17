@@ -46,19 +46,33 @@ const createUser = async (req, res) => {
     if (checkIfUserExist) throw new Error(userExists);
 
     const _otp = generateOtp(6);
-    const cachedOtp = await redisClient.set(email, JSON.stringify(_otp), {
-      EX: 60 * 10,
-    });
+    const cachedOtp = await redisClient.set(
+      `wealthbuddy_otp_${email}`,
+      JSON.stringify(_otp),
+      {
+        EX: 60 * 10,
+      }
+    );
+
     if (cachedOtp != "OK") throw new Error(errorSendingOtp);
+    const userID = uuidv4();
     await models.Users.create({
-      user_id: uuidv4(),
+      user_id: userID,
       lastName,
       firstName,
       phone_number,
       email,
       referral_code,
     });
-
+    await models.Wallets.create({
+      user_id: userID,
+      wallet_id: uuidv4(),
+      investments: 0.0,
+      wallet_balance: 0.0,
+      returns: 0.0,
+      savings: 0.0,
+      net_asset: 0.0,
+    });
     res.status(200).json({
       status: true,
       message: createUserMessage,
@@ -70,6 +84,7 @@ const createUser = async (req, res) => {
     });
   }
 };
+
 const addPassword = async (req, res) => {
   const { password, comfirmPassword, email } = req.body;
   console.log(email);
@@ -108,6 +123,7 @@ const addPassword = async (req, res) => {
     });
   }
 };
+
 const verifyOtp = async (req, res) => {
   const { otp, email } = req.params;
 
@@ -117,7 +133,7 @@ const verifyOtp = async (req, res) => {
     });
 
     if (checkIfUserIsVerified) throw new Error(serviceUnavailable);
-    const cachedOtp = await redisClient.get(email);
+    const cachedOtp = await redisClient.get(`wealthbuddy_otp_${email}`);
     console.log(cachedOtp);
     if (!cachedOtp) throw new Error(invalidOtp);
     if (cachedOtp !== otp) throw new Error(otpMismatch);
@@ -140,13 +156,18 @@ const verifyOtp = async (req, res) => {
     });
   }
 };
+
 const resendOtp = async (req, res) => {
   const { email } = req.params;
   try {
     const _otp = generateOtp(6);
-    const cachedOtp = await redisClient.set(email, JSON.stringify(_otp), {
-      EX: 60 * 10,
-    });
+    const cachedOtp = await redisClient.set(
+      `wealthbuddy_otp_${email}`,
+      JSON.stringify(_otp),
+      {
+        EX: 60 * 10,
+      }
+    );
     if (cachedOtp !== "OK") throw new Error(errorResendingOtp);
   } catch (error) {
     res.status(400).json({
@@ -155,10 +176,12 @@ const resendOtp = async (req, res) => {
     });
   }
 };
+
 const Login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
+    // console.log({ email, password });
     const { error } = validateLogin(req.body);
     if (error !== undefined) throw new Error(error.details[0].message);
     console.log(email, password);
@@ -181,12 +204,12 @@ const Login = async (req, res) => {
 
     const token = jwt.sign(
       {
-        email: user.dataValues.email_address,
+        email: user.email,
         _id: uuidv4(),
       },
       process.env.JWT_SECRET
     );
-
+    console.log(token);
     res.status(200).json({
       status: true,
       message: loginMessage,
@@ -199,15 +222,17 @@ const Login = async (req, res) => {
     });
   }
 };
+
 const getUserProfile = async (req, res) => {
   const { user_id } = req.params;
 
   try {
     const userData = await models.Users.findOne({
       where: { user_id },
+      attributes: ["firstName", "lastName", "email", "phone_number"],
     });
     console.log(userData);
-    res.status(400).json({
+    res.status(200).json({
       status: true,
       message: "USer dta fetched succefully",
       data: userData,
@@ -219,6 +244,7 @@ const getUserProfile = async (req, res) => {
     });
   }
 };
+
 module.exports = {
   createUser,
   addPassword,

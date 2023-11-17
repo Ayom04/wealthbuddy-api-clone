@@ -7,7 +7,7 @@ const validateCreateAccount = (data) => {
       .email({ minDomainSegments: 2, tlds: { allow: ["com", "net"] } })
       .required(),
     phone_number: Joi.string().min(11).required(),
-    referral_code: Joi.string().min(5),
+    referral_code: Joi.string(),
   });
   return validateRegisterUser.validate(data);
 };
